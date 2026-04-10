@@ -117,6 +117,12 @@
   /* streak banner */
   .streak-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
   .streak-pill { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+
+  /* two-week calendar */
+  .cal-wrap { margin-top: 24px; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 5px; }
+  .cal-label { font-size: 9px; color: var(--text3); text-align: center; font-family: var(--mono); }
+  .cal-dot { width: 8px; height: 8px; border-radius: 50%; margin: 0 auto; }
 </style>
 </head>
 <body>
@@ -148,6 +154,13 @@
         <button class="bpmbtn" onclick="bpmDelta(5)">+</button>
         <span class="beat" id="beat"></span>
       </div>
+    </div>
+    <div class="cal-wrap">
+      <div class="cal-grid">
+        <div class="cal-label">M</div><div class="cal-label">T</div><div class="cal-label">W</div><div class="cal-label">T</div><div class="cal-label">F</div><div class="cal-label">S</div><div class="cal-label">S</div>
+      </div>
+      <div class="cal-grid" id="calLastWeek"></div>
+      <div class="cal-grid" id="calThisWeek"></div>
     </div>
   </div>
   <div id="dv" style="display:none">
@@ -441,6 +454,44 @@ function saveProgress() {
   } catch(e) {}
 }
 
+function renderCal() {
+  try {
+    const raw = localStorage.getItem('practice_state');
+    const saved = raw ? JSON.parse(raw) : {};
+    const history = saved.history || {};
+    const todayChecked = saved.checked || {};
+    const todayCount = Object.values(todayChecked).filter(Boolean).length;
+    const today = new Date();
+    const todayKey = today.toISOString().slice(0,10);
+
+    function getStatus(d) {
+      const key = d.toISOString().slice(0,10);
+      if (key > todayKey) return 'future';
+      if (key === todayKey) return todayCount >= 6 ? 'full' : todayCount > 0 ? 'partial' : 'none';
+      return history[key] || 'none';
+    }
+
+    function makeRow(startMonday) {
+      return Array.from({length:7}, (_,i) => {
+        const d = new Date(startMonday);
+        d.setDate(startMonday.getDate() + i);
+        const s = getStatus(d);
+        const bg = s === 'full' ? 'var(--success)' : s === 'partial' ? '#E07A4E' : s === 'future' ? 'var(--bg3)' : 'var(--bg4)';
+        return `<div class="cal-dot" style="background:${bg}"></div>`;
+      }).join('');
+    }
+
+    const dow = today.getDay();
+    const mondayThis = new Date(today);
+    mondayThis.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+    const mondayLast = new Date(mondayThis);
+    mondayLast.setDate(mondayThis.getDate() - 7);
+
+    document.getElementById('calLastWeek').innerHTML = makeRow(mondayLast);
+    document.getElementById('calThisWeek').innerHTML = makeRow(mondayThis);
+  } catch(e) {}
+}
+
 function calcStreak() {
   try {
     const raw = localStorage.getItem('practice_state');
@@ -591,6 +642,7 @@ function render() {
 
   const streak = calcStreak();
   document.getElementById('streakPill').textContent = streak > 0 ? streak + ' day streak' : '';
+  renderCal();
 
   const dots = document.getElementById('dots');
   dots.innerHTML = BLOCKS.map((b,i) => `<div class="dot${i < S.bi ? ' done' : i === S.bi ? ' active' : ''}" style="${i === S.bi ? 'background:' + b.color : ''}"></div>`).join('');
