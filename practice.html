@@ -156,7 +156,7 @@
         <svg width="20" height="15" viewBox="0 0 20 15"><polyline points="2,7 7,13 18,2" fill="none" stroke="#f0f0f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="done-title">Session complete</div>
-      <div class="done-sub">54 minutes. All 6 blocks done.</div>
+      <div class="done-sub">64 minutes. All 7 blocks done.</div>
       <button class="cbtn play" onclick="restart()">go again</button>
     </div>
   </div>
@@ -185,6 +185,10 @@ const BLOCKS = [
   { title:'Harmony & fretboard', color:'#BA7517', dur:5*60, bpm:60,
     phases:[
       { t:0, label:'Voicing challenge', instr:'Find today\'s chord in every inversion across the entire neck. Then sub it into a progression you know and hear how it shifts the colour.', content:'harmony' }
+    ]},
+  { title:'Guitar Tarot', color:'#9B5DE5', dur:10*60, bpm:null,
+    phases:[
+      { t:0, label:'Note draw', instr:'Play the shuffled sequence across all strings — say each note name aloud as you find it. Accuracy first, tempo follows.', content:'tarot' }
     ]},
   { title:'Mix ear — EQ Trainer', color:'#D85A30', dur:15*60, bpm:null,
     phases:[
@@ -273,6 +277,37 @@ const FORMS = [
   {k:'AAB bar form', v:'Verse – Verse – Refrain. Folk, country.'}
 ];
 
+// — Guitar Tarot —
+const NOTES_ALL = ['A','Bb','B','C','C#','D','Eb','E','F','F#','G','Ab'];
+const TRIAD_TYPES = ['Major','Minor','Diminished','Augmented'];
+function seededShuffle(arr, seed) {
+  const a = [...arr]; let s = seed;
+  for (let i = a.length-1; i > 0; i--) {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    const j = Math.abs(s) % (i+1);
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+const tarotNotes = seededShuffle(NOTES_ALL, d0 * 7 + dw * 3);
+const tarotRoot = tarotNotes[0];
+const tarotTriad = TRIAD_TYPES[(d0 + dw) % TRIAD_TYPES.length];
+const TAROT_EX = [
+  { name:'Single String Run', ref:'Ex 1.1',
+    instr:'Play the shuffled sequence on the low E string in order, saying each note name aloud as you land on it. Slow tempo — find each fret before moving on. Repeat the exact same order on A, D, G, B, then high E.',
+    tip:'Let muscle memory take over by the 3rd string. Accuracy first — tempo follows.' },
+  { name:'String to String', ref:'Ex 1.2',
+    instr:'One note per string. First card on low E, second on A, third on D, G, B, then high E. Once you reach the top, reverse back down with the next notes in sequence.',
+    tip:'Keep a slow even tempo. The goal is connecting each note name to every position on every string.' },
+  { name:'The Daily Triad', ref:'Ex 3.1',
+    instr:`Root: ${tarotRoot} — play it as a ${tarotTriad} triad in every inversion across each string set: Low E–A–D → A–D–G → D–G–B → G–B–E. Go up and back down through each set.`,
+    tip:'Hear the quality of each inversion. Notice how the same chord sounds different depending on which note is on the bottom.' },
+  { name:'Interval Dyads', ref:'Ex 2.4',
+    instr:`Root note: ${tarotRoot}. Keep it stationary on the low E string while you play each subsequent note in the shuffled sequence as the interval note above it. Work up all 6 strings.`,
+    tip:'Try both root-on-bottom and root-on-top voicings. Train your ear to recognise each interval before you see the fret.' },
+];
+const tarotEx = TAROT_EX[d0 % TAROT_EX.length];
+
 const tw = WARMUPS[d0 % WARMUPS.length];
 const ts = SPEEDS[d0 % SPEEDS.length];
 const tg = GROOVES[(d0 + dw) % GROOVES.length];
@@ -352,6 +387,11 @@ ${PROGS.filter(p=>p!==tp).slice(0,3).map(p=>`<div style="display:flex;gap:9px;al
 <div class="clabel" style="margin-top:10px">reharmonization move</div>
 <div class="citem"><div class="citem-title">${tr.sub}</div><div class="citem-body">${tr.desc}</div><div class="citem-sub">${tr.eg}</div></div>`;
 
+    case 'tarot': return `<div class="clabel">${tarotEx.ref} — ${tarotEx.name}</div>
+<div class="citem" style="margin-bottom:10px"><div class="citem-body" style="font-size:13px;line-height:1.7">${tarotEx.instr}</div><div class="citem-sub" style="margin-top:6px">${tarotEx.tip}</div></div>
+<div class="clabel">today's shuffle</div>
+<div style="display:flex;flex-wrap:wrap;gap:4px">${tarotNotes.map((n,i)=>`<div style="background:var(--bg4);border:.5px solid var(--border2);border-radius:5px;padding:4px 0 3px;font-family:var(--mono);min-width:34px;text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:1px">${i+1}</div><div style="font-size:13px;color:${i===0?'#9B5DE5':'var(--text1)'}">${n}</div></div>`).join('')}</div>`;
+
     case 'mix': return `<div class="clabel">frequency bands</div>
 <table class="freq-tbl">
 <tr><td>Sub bass</td><td>20–80 Hz</td><td>Felt more than heard</td></tr>
@@ -388,7 +428,7 @@ function loadState() {
     const hist = saved.history || {};
     if (saved.date !== todayKey() && saved.date && Object.keys(saved.checked||{}).length > 0) {
       const vals = Object.values(saved.checked||{});
-      hist[saved.date] = vals.filter(Boolean).length === 6 ? 'full' : vals.some(Boolean) ? 'partial' : 'missed';
+      hist[saved.date] = vals.filter(Boolean).length === 7 ? 'full' : vals.some(Boolean) ? 'partial' : 'missed';
       localStorage.setItem('practice_state', JSON.stringify({ date: todayKey(), checked: {}, history: hist }));
     }
   } catch(e) {}
@@ -399,7 +439,7 @@ function saveProgress() {
     const raw = localStorage.getItem('practice_state');
     const saved = raw ? JSON.parse(raw) : { date: todayKey(), checked: {}, history: {} };
     const checked = {};
-    const keys = ['technique','repertoire','ear','harmony','mix','bonus'];
+    const keys = ['technique','repertoire','ear','harmony','tarot','mix','bonus'];
     BLOCKS.forEach((b,i) => { checked[keys[i]] = i < S.bi || (S.bi >= BLOCKS.length); });
     localStorage.setItem('practice_state', JSON.stringify({ ...saved, date: todayKey(), checked }));
   } catch(e) {}
