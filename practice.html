@@ -31,10 +31,11 @@
 
   /* top bar */
   .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
-  .dots { display: flex; gap: 4px; align-items: center; }
-  .dot { height: 3px; border-radius: 2px; width: 20px; background: var(--bg4); transition: background .3s, width .3s; }
-  .dot.active { width: 28px; }
-  .dot.done { background: var(--bg4); opacity: .5; }
+  .dots { flex: 1; display: flex; gap: 5px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .dots::-webkit-scrollbar { display: none; }
+  .nav-tab { flex-shrink: 0; font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; border: .5px solid var(--border); background: transparent; color: var(--text3); cursor: pointer; font-family: var(--sans); transition: all .15s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+  .nav-tab.active { color: var(--text1); border-color: transparent; }
+  .nav-tab.done { opacity: .45; }
   .time-left { font-family: var(--mono); font-size: 11px; color: var(--text3); }
 
   /* accent line */
@@ -559,6 +560,13 @@ function skip(d) {
   render();
 }
 
+function jumpTo(i) {
+  clearInterval(S.iv); S.playing = false; S.el = 0;
+  S.bi = i;
+  S.bpm = BLOCKS[S.bi].bpm || S.bpm;
+  render();
+}
+
 function restart() {
   clearInterval(S.iv); stopMetro();
   S.bi = 0; S.el = 0; S.playing = false;
@@ -645,7 +653,14 @@ function render() {
   renderCal();
 
   const dots = document.getElementById('dots');
-  dots.innerHTML = BLOCKS.map((b,i) => `<div class="dot${i < S.bi ? ' done' : i === S.bi ? ' active' : ''}" style="${i === S.bi ? 'background:' + b.color : ''}"></div>`).join('');
+  const BLOCK_SHORT = ['Technique','Repertoire','Ear','Harmony','Tarot','EQ'];
+  dots.innerHTML = BLOCKS.map((b,i) => {
+    const cls = i < S.bi ? ' done' : i === S.bi ? ' active' : '';
+    const style = i === S.bi ? `background:${b.color};border-color:transparent` : '';
+    return `<button class="nav-tab${cls}" style="${style}" onclick="jumpTo(${i})">${BLOCK_SHORT[i]}</button>`;
+  }).join('');
+  const activeTab = document.querySelector('.nav-tab.active');
+  if (activeTab) activeTab.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
 
   const psub = document.getElementById('psub');
   psub.innerHTML = blk.phases.length > 1 ? blk.phases.map((p,i) => {
