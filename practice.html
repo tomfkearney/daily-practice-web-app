@@ -286,6 +286,29 @@ const tr = REHARMS[(d0 + 1) % REHARMS.length];
 const tq = QUESTIONS[(d0 + dw) % QUESTIONS.length];
 const ti = IMPROVES[(d0 + 2) % IMPROVES.length];
 
+// — Song list —
+function loadSongs() {
+  try { return JSON.parse(localStorage.getItem('practice_songs') || '[]'); } catch(e) { return []; }
+}
+function saveSongs(songs) {
+  try { localStorage.setItem('practice_songs', JSON.stringify(songs)); } catch(e) {}
+}
+function todaySong() {
+  const songs = loadSongs();
+  return songs.length ? songs[d0 % songs.length] : null;
+}
+function addSongFromInput() {
+  const inp = document.getElementById('newSongInput');
+  if (!inp) return;
+  const val = inp.value.trim();
+  if (!val) return;
+  const songs = loadSongs();
+  songs.push(val);
+  saveSongs(songs);
+  inp.value = '';
+  document.getElementById('ccard').innerHTML = cc(curPhase().content);
+}
+
 function cc(content) {
   switch(content) {
     case 'warmup': return `<div class="clabel">today's drill</div>
@@ -300,12 +323,25 @@ function cc(content) {
 <div class="citem"><div class="citem-body">${tg}</div></div>
 <div class="citem-sub" style="margin-top:6px">Feel the beat before it arrives — anticipation, not reaction</div>`;
 
-    case 'rep_run': return `<div class="clabel">current song</div>
-<input class="song-input" id="songName" placeholder="song · key · tempo" /><div class="clabel">song forms reference</div>
-${FORMS.map(f=>`<div class="citem" style="padding:7px 11px"><div style="display:flex;gap:9px;align-items:baseline"><span class="citem-title" style="white-space:nowrap">${f.k}</span><span class="citem-body">${f.v}</span></div></div>`).join('')}`;
+    case 'rep_run': {
+      const songs = loadSongs();
+      const song = songs.length ? songs[d0 % songs.length] : null;
+      return `<div class="clabel">today's song</div>
+${song ? `<div class="citem" style="margin-bottom:10px"><div class="citem-title" style="font-size:15px">${song}</div><div class="citem-sub">Play it straight through without stopping</div></div>` : `<div class="citem-sub" style="margin-bottom:12px">No songs yet — add one below</div>`}
+<div class="clabel">${songs.length ? 'add another' : 'add to repertoire'}</div>
+<div style="display:flex;gap:6px">
+  <input class="song-input" id="newSongInput" placeholder="song title" style="margin-bottom:0;flex:1" onkeydown="if(event.key==='Enter')addSongFromInput()" />
+  <button class="cbtn" onclick="addSongFromInput()" style="padding:9px 14px">add</button>
+</div>
+${songs.length > 1 ? `<div class="clabel" style="margin-top:10px">repertoire (${songs.length})</div>${songs.map((s,i)=>`<div style="font-size:12px;padding:5px 2px;border-bottom:.5px solid var(--border);color:${i===d0%songs.length?'var(--text1)':'var(--text3)'}">${s}</div>`).join('')}` : ''}`;
+    }
 
-    case 'rep_shed': return `<div class="clabel">woodshed method</div>
+    case 'rep_shed': {
+      const song = todaySong();
+      return `${song ? `<div class="clabel">working on</div><div class="citem" style="margin-bottom:10px"><div class="citem-title">${song}</div></div>` : ''}
+<div class="clabel">woodshed method</div>
 ${[['Isolate','Find the exact 4-bar passage that breaks down'],['Slow it','70% of target tempo — every note clean'],['Ramp up','+4 BPM every 2 clean passes'],['In context','2 bars before → passage → 2 bars after']].map(([t,b])=>`<div class="citem" style="padding:7px 11px"><div style="display:flex;gap:9px;align-items:baseline"><span class="citem-title">${t}</span><span class="citem-body">${b}</span></div></div>`).join('')}`;
+    }
 
     case 'ear_prog': return `<div class="clabel">today's target</div>
 <div class="citem"><div class="citem-title">${tp.name}</div><div class="prog-nums">${tp.nums}</div><div class="citem-sub">In C: ${tp.eg}</div></div>
