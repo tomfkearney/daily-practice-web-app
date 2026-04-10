@@ -242,7 +242,7 @@ const INTERVALS = [
   {n:'Minor 7th', s:'Somewhere — West Side Story'},
   {n:'Octave', s:'Somewhere Over the Rainbow'}
 ];
-const CHORDS = ['Cmaj7','Dm7','G7','Am7','Fmaj7','Em7b5','Bb','Ebmaj7','D7','A7','Bm7','F#m7','Db','Ab','E7'];
+const CHORDS = ['C','Dm','G','Am','F','Em','Bb','Eb','D','A','Bm','F#m','Db','Ab','E'];
 const REHARMS = [
   {sub:'Tritone substitution', desc:'Replace V7 with a chord a tritone away.', eg:'G7 → Db7 → C'},
   {sub:'Relative minor swap', desc:'Replace a major chord with its relative minor.', eg:'C → Am — same notes, softer feel'},
@@ -352,7 +352,7 @@ ${PROGS.filter(p=>p!==tp).slice(0,3).map(p=>`<div style="display:flex;gap:9px;al
 <div class="cgrid">${INTERVALS.slice(0,8).map(i=>`<div class="citem" style="padding:7px 10px"><div class="citem-title">${i.n}</div><div class="citem-sub">${i.s}</div></div>`).join('')}</div>`;
 
     case 'harmony': return `<div class="clabel">today's chord</div>
-<div class="citem" style="text-align:center;padding:14px"><div class="chord-big">${tc}</div><div class="citem-sub">root position + all inversions, whole neck</div></div>
+<div class="citem" style="text-align:center;padding:14px"><div class="chord-big">${tc}</div><div class="citem-sub">root position + 1st + 2nd inversion, whole neck</div></div>
 <div class="clabel" style="margin-top:10px">reharmonization move</div>
 <div class="citem"><div class="citem-title">${tr.sub}</div><div class="citem-body">${tr.desc}</div><div class="citem-sub">${tr.eg}</div></div>`;
 
