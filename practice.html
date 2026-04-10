@@ -331,6 +331,36 @@ const TAROT_EX = [
 ];
 const tarotEx = TAROT_EX[d0 % TAROT_EX.length];
 
+// — Keys & component notes —
+const KEYS = {
+  // Major
+  'A':   ['A','B','C#','D','E','F#','G#'],
+  'A#':  ['A#','C','D','D#','F','G','A'],
+  'B':   ['B','C#','D#','E','F#','G#','A#'],
+  'C':   ['C','D','E','F','G','A','B'],
+  'C#':  ['C#','D#','F','F#','G#','A#','C'],
+  'D':   ['D','E','F#','G','A','B','C#'],
+  'D#':  ['D#','F','G','G#','A#','C','D'],
+  'E':   ['E','F#','G#','A','B','C#','D#'],
+  'F':   ['F','G','A','A#','C','D','E'],
+  'F#':  ['F#','G#','A#','B','C#','D#','F'],
+  'G':   ['G','A','B','C','D','E','F#'],
+  'G#':  ['G#','A#','C','C#','D#','F','G'],
+  // Minor (natural)
+  'Am':  ['A','B','C','D','E','F','G'],
+  'A#m': ['A#','C','C#','D#','F','F#','G#'],
+  'Bm':  ['B','C#','D','E','F#','G','A'],
+  'Cm':  ['C','D','D#','F','G','G#','A#'],
+  'C#m': ['C#','D#','E','F#','G#','A','B'],
+  'Dm':  ['D','E','F','G','A','A#','C'],
+  'D#m': ['D#','F','F#','G#','A#','B','C#'],
+  'Em':  ['E','F#','G','A','B','C','D'],
+  'Fm':  ['F','G','G#','A#','C','C#','D#'],
+  'F#m': ['F#','G#','A','B','C#','D','E'],
+  'Gm':  ['G','A','A#','C','D','D#','F'],
+  'G#m': ['G#','A#','B','C#','D#','E','F#'],
+};
+
 const tw = WARMUPS[d0 % WARMUPS.length];
 const ts = SPEEDS[d0 % SPEEDS.length];
 const tg = GROOVES[(d0 + dw) % GROOVES.length];
