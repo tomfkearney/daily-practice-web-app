@@ -163,6 +163,9 @@
       <div class="cal-grid" id="calLastWeek"></div>
       <div class="cal-grid" id="calThisWeek"></div>
     </div>
+    <div style="text-align:center;margin-top:16px">
+      <button onclick="openEditor()" style="background:none;border:none;font-size:11px;color:var(--text3);cursor:pointer;font-family:var(--sans);padding:4px 8px">preview content</button>
+    </div>
   </div>
   <div id="dv" style="display:none">
     <div class="done-wrap">
@@ -173,6 +176,16 @@
       <div class="done-sub">59 minutes. All 6 blocks done.</div>
       <button class="cbtn play" onclick="restart()">go again</button>
     </div>
+  </div>
+</div>
+
+<div id="editorOverlay" style="display:none;position:fixed;inset:0;background:var(--bg);overflow-y:auto;z-index:100;padding:20px 18px 60px">
+  <div style="max-width:540px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div style="font-size:15px;font-weight:500;color:var(--text1)">Content Preview</div>
+      <button class="cbtn" onclick="document.getElementById('editorOverlay').style.display='none'">close</button>
+    </div>
+    <div id="editorContent"></div>
   </div>
 </div>
 
@@ -565,6 +578,38 @@ function jumpTo(i) {
   S.bi = i;
   S.bpm = BLOCKS[S.bi].bpm || S.bpm;
   render();
+}
+
+function openEditor() {
+  function edSection(title, items) {
+    return `<div style="margin-bottom:28px">
+      <div style="font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">${title}</div>
+      ${items.map((html, i) => `<div class="citem" style="margin-bottom:6px"><div style="font-size:9px;color:var(--text3);margin-bottom:5px">#${i+1}</div>${html}</div>`).join('')}
+    </div>`;
+  }
+
+  document.getElementById('editorContent').innerHTML = [
+    edSection('Technique — Warm-ups', WARMUPS.map(w =>
+      `<div class="citem-title">${w.name}</div><div class="citem-body">${w.desc}</div>`)),
+    edSection('Technique — Speed drills', SPEEDS.map(s =>
+      `<div class="citem-body">${s}</div>`)),
+    edSection('Technique — Grooves', GROOVES.map(g =>
+      `<div class="citem-body">${g}</div>`)),
+    edSection('Ear Training — Progressions', PROGS.map(p =>
+      `<div class="citem-title">${p.name}</div><div class="prog-nums">${p.nums}</div><div class="citem-sub">In C: ${p.eg}</div>`)),
+    edSection('Harmony — Chords', CHORDS.map(c =>
+      `<div style="font-family:var(--mono);font-size:18px;color:var(--text1)">${c}</div>`)),
+    edSection('Harmony — Reharmonizations', REHARMS.map(r =>
+      `<div class="citem-title">${r.sub}</div><div class="citem-body">${r.desc}</div><div class="citem-sub">${r.eg}</div>`)),
+    edSection('Guitar Tarot — Exercises', TAROT_EX.map(e =>
+      `<div class="citem-title">${e.ref} — ${e.name}</div><div class="citem-body" style="margin-top:4px">${e.instr}</div><div class="citem-sub" style="margin-top:4px">${e.tip}</div>`)),
+    edSection('Song Knowledge — Questions', QUESTIONS.map(q =>
+      `<div class="citem-body">${q}</div>`)),
+    edSection('Free Improv — Constraints', IMPROVES.map(imp =>
+      `<div class="citem-body">${imp}</div>`)),
+  ].join('');
+
+  document.getElementById('editorOverlay').style.display = '';
 }
 
 function restart() {
