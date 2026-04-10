@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #181818;
+    --bg3: #222222;
+    --bg4: #2a2a2a;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text1: #f0f0f0;
+    --text2: #888;
+    --text3: #555;
+    --danger: #e05a4e;
+    --success: #4caf7d;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text1); font-family: var(--sans); }
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+
+  #app { flex: 1; display: flex; flex-direction: column; max-width: 540px; margin: 0 auto; width: 100%; padding: 20px 18px 32px; }
+
+  /* top bar */
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+  .dots { display: flex; gap: 4px; align-items: center; }
+  .dot { height: 3px; border-radius: 2px; width: 20px; background: var(--bg4); transition: background .3s, width .3s; }
+  .dot.active { width: 28px; }
+  .dot.done { background: var(--bg4); opacity: .5; }
+  .time-left { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+
+  /* accent line */
+  .accent { height: 1px; background: var(--bg3); margin-bottom: 22px; transition: background .4s; }
+
+  /* phase label */
+  .phase-label { font-size: 10px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; min-height: 14px; }
+
+  /* timer */
+  .timer { font-family: var(--mono); font-size: 72px; font-weight: 400; color: var(--text1); line-height: 1; margin-bottom: 6px; letter-spacing: -2px; transition: color .2s; }
+  .timer.warn { color: var(--danger); }
+
+  /* block title */
+  .block-title { font-size: 22px; font-weight: 300; color: var(--text1); margin-bottom: 8px; line-height: 1.2; }
+
+  /* instruction */
+  .block-instr { font-size: 13px; color: var(--text2); line-height: 1.65; margin-bottom: 18px; min-height: 42px; }
+
+  /* phase segments */
+  .phase-sub { display: flex; gap: 4px; margin-bottom: 20px; min-height: 2px; }
+  .pseg { height: 2px; border-radius: 1px; flex: 1; background: var(--bg4); transition: background .3s; }
+  .pseg.done { background: var(--bg3); opacity: .7; }
+  .pseg.active { }
+
+  /* content card */
+  .ccard { background: var(--bg2); border-radius: 10px; padding: 14px 15px; margin-bottom: 22px; min-height: 100px; border: .5px solid var(--border); }
+  .clabel { font-size: 9px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .citem { background: var(--bg3); border-radius: 7px; padding: 9px 12px; margin-bottom: 6px; border: .5px solid var(--border); }
+  .citem:last-child { margin-bottom: 0; }
+  .citem-title { font-size: 13px; font-weight: 500; color: var(--text1); margin-bottom: 3px; }
+  .citem-body { font-size: 12px; color: var(--text2); line-height: 1.55; }
+  .citem-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .cgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .chord-big { font-family: var(--mono); font-size: 30px; font-weight: 400; color: var(--text1); margin-bottom: 4px; }
+
+  /* nashville numbers */
+  .prog-nums { font-family: var(--mono); font-size: 14px; color: var(--text1); margin: 4px 0; }
+
+  /* freq table */
+  .freq-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .freq-tbl td { padding: 6px 5px; border-bottom: .5px solid var(--border); vertical-align: top; }
+  .freq-tbl tr:last-child td { border-bottom: none; }
+  .freq-tbl td:first-child { font-weight: 500; color: var(--text1); min-width: 76px; white-space: nowrap; }
+  .freq-tbl td:nth-child(2) { font-family: var(--mono); font-size: 11px; color: var(--text3); min-width: 80px; }
+  .freq-tbl td:last-child { color: var(--text2); }
+
+  /* song input */
+  .song-input { width: 100%; background: var(--bg3); border: .5px solid var(--border2); border-radius: 7px; padding: 9px 12px; font-size: 13px; font-family: var(--sans); color: var(--text1); outline: none; margin-bottom: 10px; }
+  .song-input::placeholder { color: var(--text3); }
+  .song-input:focus { border-color: rgba(255,255,255,.28); }
+
+  /* controls */
+  .controls { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 16px; }
+  .cbtn { background: transparent; border: .5px solid var(--border2); border-radius: 8px; padding: 9px 18px; font-size: 13px; font-family: var(--sans); color: var(--text2); cursor: pointer; transition: background .12s, color .12s; white-space: nowrap; }
+  .cbtn:hover { background: var(--bg3); color: var(--text1); }
+  .cbtn:active { transform: scale(.97); }
+  .cbtn.play { padding: 11px 36px; font-size: 15px; font-weight: 500; color: var(--text1); border-color: var(--border2); }
+  .cbtn.play:hover { background: var(--bg3); }
+
+  /* metronome */
+  .metro-row { display: flex; align-items: center; justify-content: center; gap: 14px; transition: opacity .2s; }
+  .metro-row.dim { opacity: .3; pointer-events: none; }
+  .mtoggle { background: transparent; border: .5px solid var(--border); border-radius: 7px; padding: 5px 12px; font-size: 12px; font-family: var(--sans); color: var(--text3); cursor: pointer; transition: all .12s; }
+  .mtoggle:hover { border-color: var(--border2); color: var(--text2); }
+  .mtoggle.on { border-color: var(--border2); color: var(--text1); }
+  .bpm-row { display: flex; align-items: center; gap: 8px; }
+  .bpmbtn { width: 26px; height: 26px; border-radius: 50%; border: .5px solid var(--border); background: transparent; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text3); transition: all .1s; }
+  .bpmbtn:hover { border-color: var(--border2); color: var(--text1); }
+  .bpmval { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--text1); min-width: 30px; text-align: center; }
+  .bpmlabel { font-size: 12px; color: var(--text3); }
+  .beat { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--bg4); transition: background .04s; }
+  .beat.on { background: var(--text1); }
+
+  /* done screen */
+  .done-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 0; }
+  .done-ring { width: 52px; height: 52px; border-radius: 50%; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+  .done-title { font-size: 24px; font-weight: 300; color: var(--text1); margin-bottom: 8px; }
+  .done-sub { font-size: 14px; color: var(--text3); margin-bottom: 2rem; }
+
+  /* streak banner */
+  .streak-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+  .streak-pill { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sv">
+    <div class="streak-row"><span class="streak-pill" id="streakPill"></span></div>
+    <div class="topbar">
+      <div class="dots" id="dots"></div>
+      <div class="time-left" id="tleft"></div>
+    </div>
+    <div class="accent" id="accent"></div>
+    <div class="phase-label" id="plabel"></div>
+    <div class="timer" id="timer">13:00</div>
+    <div class="block-title" id="btitle"></div>
+    <div class="block-instr" id="binstr"></div>
+    <div class="phase-sub" id="psub"></div>
+    <div class="ccard" id="ccard"></div>
+    <div class="controls">
+      <button class="cbtn" onclick="skip(-1)">← prev</button>
+      <button class="cbtn play" id="playbtn" onclick="togglePlay()">play</button>
+      <button class="cbtn" onclick="skip(1)">next →</button>
+    </div>
+    <div class="metro-row" id="mrow">
+      <button class="mtoggle" id="mtog" onclick="toggleMetro()">metronome</button>
+      <div class="bpm-row">
+        <button class="bpmbtn" onclick="bpmDelta(-5)">−</button>
+        <span class="bpmval" id="bpmv">80</span>
+        <span class="bpmlabel">bpm</span>
+        <button class="bpmbtn" onclick="bpmDelta(5)">+</button>
+        <span class="beat" id="beat"></span>
+      </div>
+    </div>
+  </div>
+  <div id="dv" style="display:none">
+    <div class="done-wrap">
+      <div class="done-ring">
+        <svg width="20" height="15" viewBox="0 0 20 15"><polyline points="2,7 7,13 18,2" fill="none" stroke="#f0f0f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="done-title">Session complete</div>
+      <div class="done-sub">45 minutes. All 7 blocks done.</div>
+      <button class="cbtn play" onclick="restart()">go again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const d0 = new Date().getDate(), dw = new Date().getDay();
+
+const BLOCKS = [
+  { title:'Technique & groove', color:'#7F77DD', dur:13*60, bpm:80,
+    phases:[
+      { t:0, label:'Warm-up', instr:'4-finger chromatic, ascending and descending all strings. Keep pressure light — this is blood flow, not muscle work.', content:'warmup' },
+      { t:3*60, label:'Speed drill', instr:'Pick a pattern. Start at your current BPM, add 4 BPM every 2 clean passes. Even pick attack throughout — accuracy then speed.', content:'speed' },
+      { t:8*60, label:'Groove', instr:'Metronome on. Play a rhythm figure and feel the click inside the note, not after it. Anticipate the beat — don\'t chase it.', content:'groove' }
+    ]},
+  { title:'Repertoire', color:'#1D9E75', dur:8*60, bpm:90,
+    phases:[
+      { t:0, label:'Full run', instr:'Run the song straight through without stopping. Build the complete mental map first — corrections come in the next phase.', content:'rep_run' },
+      { t:4*60, label:'Woodshed', instr:'Find the hardest 4-bar section and loop it at 70% tempo until it\'s clean. Then ramp up in 4 BPM increments.', content:'rep_shed' }
+    ]},
+  { title:'Ear training', color:'#378ADD', dur:8*60, bpm:70,
+    phases:[
+      { t:0, label:'Progression ID', instr:'Pick a track. Find the root, work out the full chord progression by ear. Sing the root motion first, then confirm on guitar.', content:'ear_prog' },
+      { t:4*60, label:'Melody transcription', instr:'Pick a vocal or guitar line. Hum it first, find the opening note, then walk each interval. Don\'t jump ahead.', content:'ear_mel' }
+    ]},
+  { title:'Harmony & fretboard', color:'#BA7517', dur:5*60, bpm:60,
+    phases:[
+      { t:0, label:'Voicing challenge', instr:'Find today\'s chord in every inversion across the entire neck. Then sub it into a progression you know and hear how it shifts the colour.', content:'harmony' }
+    ]},
+  { title:'Mix ear — EQ Trainer', color:'#D85A30', dur:6*60, bpm:null,
+    phases:[
+      { t:0, label:'Frequency drills', instr:'Open EQ Trainer. Two rounds on guitar, two rounds on drums. Identify the character of the band first — then narrow to the exact frequency.', content:'mix' }
+    ]},
+  { title:'Song knowledge', color:'#3B6D11', dur:5*60, bpm:null,
+    phases:[
+      { t:0, label:'Analytical listen', instr:'One track, full attention. Use the question below as your lens. No multitasking — just listen.', content:'song' }
+    ]},
+  { title:'Free improv', color:'#888780', dur:5*60, bpm:null,
+    phases:[
+      { t:0, label:'Open play', instr:'No agenda, no analysis. Play what comes. This is integration — let the practice become music.', content:'improv' }
+    ]}
+];
+
+const WARMUPS = [
+  {name:'Spider crawl', desc:'1-2-3-4 on each string, all 6 strings, ascending and descending. Keep all 4 fingers down.'},
+  {name:'Chromatic scale', desc:'One string, every fret from open to 12. Economy of motion — no wasted movement.'},
+  {name:'Hammer-on / pull-off', desc:'Two adjacent fingers only, legato — no pick. Build the hand strength.'},
+  {name:'Trills', desc:'1st and 3rd finger trill, 20 seconds per string. Even volume on both notes.'}
+];
+const SPEEDS = [
+  'Pentatonic box 1 — ascending and descending, strict alternate pick',
+  'Triplet arpeggio across all 6 strings, A minor shape',
+  '6-note sequence per string: 1-2-3-1-2-3, shift position each string',
+  'String-skipping: E and G strings only, minor pentatonic intervals',
+  'Economy picking: 3-notes-per-string major scale, one directional sweep per string change'
+];
+const GROOVES = [
+  'Beats 2 and 4 only — mute everything else. Feel the backbeat pocket.',
+  '16th note strum with dead strings — keep the muted notes perfectly even.',
+  'Simple bassline on low strings with click. Land exactly on the beat.',
+  'Call-and-response: 2 bars rhythm, 2 bars silence. Come back in exactly on 1.',
+  'Swing 8ths on I-IV-V. Let the notes breathe — don\'t rush the triplet feel.'
+];
+const PROGS = [
+  {name:'Pop I-V-vi-IV', nums:'1 – 5 – 6m – 4', eg:'G D Em C'},
+  {name:'Jazz ii-V-I', nums:'2m7 – 5 7 – 1 maj7', eg:'Dm7 G7 Cmaj7'},
+  {name:'Blues I-IV-V', nums:'1 – 4 – 1 – 5 – 4 – 1', eg:'A D A E D A'},
+  {name:'Andalusian', nums:'1m – 7 – 6 – 5', eg:'Am G F E'},
+  {name:'50s doo-wop', nums:'1 – 6m – 4 – 5', eg:'C Am F G'},
+  {name:'Rhythm changes A', nums:'1 – 6m – 2m – 5', eg:'Bb G7 Cm F7'},
+  {name:'Minor turnaround', nums:'1m – 7 – 6 – 5', eg:'Am G F E'}
+];
+const INTERVALS = [
+  {n:'Minor 2nd', s:'Jaws theme'},
+  {n:'Major 2nd', s:'Happy Birthday opening'},
+  {n:'Minor 3rd', s:'Smoke on the Water'},
+  {n:'Major 3rd', s:'When the Saints go Marching In'},
+  {n:'Perfect 4th', s:'Here Comes the Bride'},
+  {n:'Tritone', s:'Simpsons theme'},
+  {n:'Perfect 5th', s:'Twinkle Twinkle'},
+  {n:'Minor 6th', s:'The Entertainer'},
+  {n:'Major 6th', s:'My Bonnie Lies Over the Ocean'},
+  {n:'Minor 7th', s:'Somewhere — West Side Story'},
+  {n:'Octave', s:'Somewhere Over the Rainbow'}
+];
+const CHORDS = ['Cmaj7','Dm7','G7','Am7','Fmaj7','Em7b5','Bb','Ebmaj7','D7','A7','Bm7','F#m7','Db','Ab','E7'];
+const REHARMS = [
+  {sub:'Tritone substitution', desc:'Replace V7 with a chord a tritone away.', eg:'G7 → Db7 → C'},
+  {sub:'Relative minor swap', desc:'Replace a major chord with its relative minor.', eg:'C → Am — same notes, softer feel'},
+  {sub:'Secondary dominant', desc:'Add a V7 before any chord to pull into it.', eg:'Before Am: add E7'},
+  {sub:'Backdoor dominant', desc:'Replace V7 with bVII7.', eg:'G7 → Bb7 → C — bluesy motion'},
+  {sub:'Passing diminished', desc:'Chromatic passing chord between two diatonic chords.', eg:'C – C#dim – Dm'}
+];
+const QUESTIONS = [
+  'Where is the dynamic peak? What builds to it and how does it resolve?',
+  'What is the guitar doing in the verses versus the choruses? How does density shift?',
+  'How does the intro set up the whole track? Could it start anywhere else?',
+  'What keeps this song interesting after the first 30 seconds? Find 3 specific techniques.',
+  'How does the bass interact with the kick? Locked together or dancing around each other?',
+  'What chord or voicing creates the emotional high point? Find it on guitar.',
+  'What would you change about this arrangement if it were your record?',
+  'What is the production doing that most listeners won\'t notice but would miss if it was gone?'
+];
+const IMPROVES = [
+  'One chord only — Dm7. Make it interesting for 5 minutes.',
+  'Play a melody that could be the hook of a song. No chords, just melody.',
+  'Dorian over a drone on A. Focus on note choice, not speed.',
+  'Tell a story: intro → tension → release → ending.',
+  'Play something pentatonic but add exactly one outside note.',
+  'Play the saddest thing you can play right now.',
+  'Pretend you\'re behind a vocalist. Leave space. Support, don\'t compete.',
+  'Take one 2-bar riff and develop it — vary it, invert it, fragment it.'
+];
+const FORMS = [
+  {k:'ABABCB', v:'Verse – Chorus – Verse – Chorus – Bridge – Chorus'},
+  {k:'AABA 32-bar', v:'8+8+8+8. Standard jazz form.'},
+  {k:'12-bar blues', v:'I I I I / IV IV I I / V IV I V'},
+  {k:'AAB bar form', v:'Verse – Verse – Refrain. Folk, country.'}
+];
+
+const tw = WARMUPS[d0 % WARMUPS.length];
+const ts = SPEEDS[d0 % SPEEDS.length];
+const tg = GROOVES[(d0 + dw) % GROOVES.length];
+const tp = PROGS[(d0 + dw) % PROGS.length];
+const tc = CHORDS[d0 % CHORDS.length];
+const tr = REHARMS[(d0 + 1) % REHARMS.length];
+const tq = QUESTIONS[(d0 + dw) % QUESTIONS.length];
+const ti = IMPROVES[(d0 + 2) % IMPROVES.length];
+
+function cc(content) {
+  switch(content) {
+    case 'warmup': return `<div class="clabel">today's drill</div>
+<div class="citem"><div class="citem-title">${tw.name}</div><div class="citem-body">${tw.desc}</div></div>
+<div class="citem-sub" style="margin-top:6px">speed drill starts at 3:00</div>`;
+
+    case 'speed': return `<div class="clabel">today's pattern</div>
+<div class="citem"><div class="citem-body">${ts}</div></div>
+<div class="citem-sub" style="margin-top:6px">Start at your current BPM — raise 4 every 2 clean passes</div>`;
+
+    case 'groove': return `<div class="clabel">groove exercise</div>
+<div class="citem"><div class="citem-body">${tg}</div></div>
+<div class="citem-sub" style="margin-top:6px">Feel the beat before it arrives — anticipation, not reaction</div>`;
+
+    case 'rep_run': return `<div class="clabel">current song</div>
+<input class="song-input" id="songName" placeholder="song · key · tempo" /><div class="clabel">song forms reference</div>
+${FORMS.map(f=>`<div class="citem" style="padding:7px 11px"><div style="display:flex;gap:9px;align-items:baseline"><span class="citem-title" style="white-space:nowrap">${f.k}</span><span class="citem-body">${f.v}</span></div></div>`).join('')}`;
+
+    case 'rep_shed': return `<div class="clabel">woodshed method</div>
+${[['Isolate','Find the exact 4-bar passage that breaks down'],['Slow it','70% of target tempo — every note clean'],['Ramp up','+4 BPM every 2 clean passes'],['In context','2 bars before → passage → 2 bars after']].map(([t,b])=>`<div class="citem" style="padding:7px 11px"><div style="display:flex;gap:9px;align-items:baseline"><span class="citem-title">${t}</span><span class="citem-body">${b}</span></div></div>`).join('')}`;
+
+    case 'ear_prog': return `<div class="clabel">today's target</div>
+<div class="citem"><div class="citem-title">${tp.name}</div><div class="prog-nums">${tp.nums}</div><div class="citem-sub">In C: ${tp.eg}</div></div>
+<div class="clabel" style="margin-top:10px">also listen for</div>
+${PROGS.filter(p=>p!==tp).slice(0,3).map(p=>`<div style="display:flex;gap:9px;align-items:baseline;padding:5px 2px;border-bottom:.5px solid rgba(255,255,255,.07)"><span class="citem-body" style="min-width:110px;flex-shrink:0">${p.name}</span><span style="font-family:var(--mono);font-size:12px;color:#888">${p.nums}</span></div>`).join('')}`;
+
+    case 'ear_mel': return `<div class="clabel">interval reference</div>
+<div class="cgrid">${INTERVALS.slice(0,8).map(i=>`<div class="citem" style="padding:7px 10px"><div class="citem-title">${i.n}</div><div class="citem-sub">${i.s}</div></div>`).join('')}</div>`;
+
+    case 'harmony': return `<div class="clabel">today's chord</div>
+<div class="citem" style="text-align:center;padding:14px"><div class="chord-big">${tc}</div><div class="citem-sub">root position + all inversions, whole neck</div></div>
+<div class="clabel" style="margin-top:10px">reharmonization move</div>
+<div class="citem"><div class="citem-title">${tr.sub}</div><div class="citem-body">${tr.desc}</div><div class="citem-sub">${tr.eg}</div></div>`;
+
+    case 'mix': return `<div class="clabel">frequency bands</div>
+<table class="freq-tbl">
+<tr><td>Sub bass</td><td>20–80 Hz</td><td>Felt more than heard</td></tr>
+<tr><td>Bass</td><td>80–250 Hz</td><td>Warmth and fullness. Mud lives here.</td></tr>
+<tr><td>Low-mid</td><td>250–500 Hz</td><td>Body of guitar and vocals. Boxy.</td></tr>
+<tr><td>Midrange</td><td>500 Hz–2k</td><td>Nasal, honk. Guitar presence.</td></tr>
+<tr><td>Upper-mid</td><td>2k–8k</td><td>Attack, clarity, definition.</td></tr>
+<tr><td>Air</td><td>8k–20k</td><td>Sparkle, breath, cymbal sizzle.</td></tr>
+</table>`;
+
+    case 'song': return `<div class="clabel">today's question</div>
+<div class="citem"><div class="citem-body" style="font-size:13px;line-height:1.7">${tq}</div></div>
+<div class="citem-sub" style="margin-top:8px">One track. Full attention. Nothing else.</div>`;
+
+    case 'improv': return `<div class="clabel">today's constraint</div>
+<div class="citem"><div class="citem-body" style="font-size:13px;line-height:1.7">${ti}</div></div>
+<div class="citem-sub" style="margin-top:8px">No analysis. Just play.</div>`;
+
+    default: return '';
+  }
+}
+
+// — State —
+let S = { bi:0, el:0, playing:false, mOn:false, bpm:80, iv:null, miv:null, actx:null, bflash:null };
+
+// — Storage (localStorage) —
+function todayKey() { return new Date().toISOString().slice(0,10); }
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('practice_state');
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    const hist = saved.history || {};
+    if (saved.date !== todayKey() && saved.date && Object.keys(saved.checked||{}).length > 0) {
+      const vals = Object.values(saved.checked||{});
+      hist[saved.date] = vals.filter(Boolean).length === 7 ? 'full' : vals.some(Boolean) ? 'partial' : 'missed';
+      localStorage.setItem('practice_state', JSON.stringify({ date: todayKey(), checked: {}, history: hist }));
+    }
+  } catch(e) {}
+}
+
+function saveProgress() {
+  try {
+    const raw = localStorage.getItem('practice_state');
+    const saved = raw ? JSON.parse(raw) : { date: todayKey(), checked: {}, history: {} };
+    const checked = {};
+    const keys = ['technique','repertoire','ear','harmony','mix','song','bonus'];
+    BLOCKS.forEach((b,i) => { checked[keys[i]] = i < S.bi || (S.bi >= BLOCKS.length); });
+    localStorage.setItem('practice_state', JSON.stringify({ ...saved, date: todayKey(), checked }));
+  } catch(e) {}
+}
+
+function calcStreak() {
+  try {
+    const raw = localStorage.getItem('practice_state');
+    if (!raw) return 0;
+    const { history, date, checked } = JSON.parse(raw);
+    let streak = 0;
+    const todayDone = Object.values(checked||{}).filter(Boolean).length >= 6;
+    let d = new Date();
+    if (!todayDone) d.setDate(d.getDate()-1);
+    for (let i = 0; i < 365; i++) {
+      const k = d.toISOString().slice(0,10);
+      if (i === 0 && todayDone) { streak++; d.setDate(d.getDate()-1); continue; }
+      if (history && history[k] === 'full') { streak++; d.setDate(d.getDate()-1); }
+      else break;
+    }
+    return streak;
+  } catch(e) { return 0; }
+}
+
+// — Helpers —
+function fmt(s) { return Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60); }
+function totalDur() { return BLOCKS.reduce((a,b)=>a+b.dur,0); }
+function blockStart(i) { let t=0; for(let j=0;j<i;j++) t+=BLOCKS[j].dur; return t; }
+function totalEl() { return blockStart(S.bi) + S.el; }
+function curPhase() {
+  let p = BLOCKS[S.bi].phases[0];
+  for (const ph of BLOCKS[S.bi].phases) { if (S.el >= ph.t) p = ph; }
+  return p;
+}
+
+// — Controls —
+function togglePlay() {
+  if (S.bi >= BLOCKS.length) return;
+  S.playing = !S.playing;
+  if (S.playing) { S.iv = setInterval(tick, 1000); }
+  else { clearInterval(S.iv); }
+  render();
+}
+
+function tick() {
+  const blk = BLOCKS[S.bi];
+  S.el++;
+  if (S.el >= blk.dur) {
+    playAdvance();
+    S.el = 0; S.bi++;
+    if (S.bi >= BLOCKS.length) {
+      S.playing = false; clearInterval(S.iv); stopMetro();
+      saveProgress();
+      document.getElementById('sv').style.display = 'none';
+      document.getElementById('dv').style.display = '';
+      return;
+    }
+    S.bpm = BLOCKS[S.bi].bpm || S.bpm;
+    if (S.mOn && BLOCKS[S.bi].bpm) restartMetro();
+    else if (S.mOn && !BLOCKS[S.bi].bpm) stopMetro();
+    saveProgress();
+  }
+  render();
+}
+
+function skip(d) {
+  clearInterval(S.iv); S.playing = false; S.el = 0;
+  S.bi = Math.max(0, Math.min(BLOCKS.length-1, S.bi+d));
+  S.bpm = BLOCKS[S.bi].bpm || S.bpm;
+  render();
+}
+
+function restart() {
+  clearInterval(S.iv); stopMetro();
+  S.bi = 0; S.el = 0; S.playing = false;
+  document.getElementById('sv').style.display = '';
+  document.getElementById('dv').style.display = 'none';
+  render();
+}
+
+// — Metronome —
+function toggleMetro() {
+  if (S.mOn) { stopMetro(); }
+  else { S.mOn = true; startMetro(); }
+  render();
+}
+
+function startMetro() {
+  if (!S.actx) S.actx = new (window.AudioContext || window.webkitAudioContext)();
+  const ms = Math.round(60000 / S.bpm);
+  S.miv = setInterval(() => {
+    const ctx = S.actx;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(.18, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + .04);
+    o.start(ctx.currentTime); o.stop(ctx.currentTime + .05);
+    const b = document.getElementById('beat');
+    if (b) { b.classList.add('on'); clearTimeout(S.bflash); S.bflash = setTimeout(() => b.classList.remove('on'), 70); }
+  }, ms);
+}
+
+function stopMetro() { clearInterval(S.miv); S.miv = null; S.mOn = false; }
+function restartMetro() { clearInterval(S.miv); startMetro(); }
+
+function playAdvance() {
+  try {
+    if (!S.actx) S.actx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = S.actx;
+    [880, 660].forEach((f, i) => {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = f;
+      const t = ctx.currentTime + i * .18;
+      g.gain.setValueAtTime(.28, t);
+      g.gain.exponentialRampToValueAtTime(.001, t + .12);
+      o.start(t); o.stop(t + .14);
+    });
+  } catch(e) {}
+}
+
+function bpmDelta(d) {
+  S.bpm = Math.max(40, Math.min(240, S.bpm + d));
+  if (S.mOn) restartMetro();
+  render();
+}
+
+// — Render —
+function render() {
+  if (S.bi >= BLOCKS.length) return;
+  const blk = BLOCKS[S.bi];
+  const ph = curPhase();
+  const rem = blk.dur - S.el;
+  const tl = totalDur() - totalEl();
+
+  document.getElementById('accent').style.background = blk.color;
+
+  const td = document.getElementById('timer');
+  td.textContent = fmt(rem);
+  td.className = 'timer' + (rem <= 10 ? ' warn' : '');
+
+  document.getElementById('plabel').textContent = ph.label;
+  document.getElementById('btitle').textContent = blk.title;
+  document.getElementById('binstr').textContent = ph.instr;
+  document.getElementById('ccard').innerHTML = cc(ph.content);
+  document.getElementById('tleft').textContent = fmt(tl) + ' left';
+  document.getElementById('playbtn').textContent = S.playing ? 'pause' : 'play';
+  document.getElementById('bpmv').textContent = S.bpm;
+  document.getElementById('mtog').textContent = S.mOn ? 'metronome on' : 'metronome';
+  document.getElementById('mtog').className = 'mtoggle' + (S.mOn ? ' on' : '');
+  document.getElementById('mrow').className = 'metro-row' + (blk.bpm ? '' : ' dim');
+
+  const streak = calcStreak();
+  document.getElementById('streakPill').textContent = streak > 0 ? streak + ' day streak' : '';
+
+  const dots = document.getElementById('dots');
+  dots.innerHTML = BLOCKS.map((b,i) => `<div class="dot${i < S.bi ? ' done' : i === S.bi ? ' active' : ''}" style="${i === S.bi ? 'background:' + b.color : ''}"></div>`).join('');
+
+  const psub = document.getElementById('psub');
+  psub.innerHTML = blk.phases.length > 1 ? blk.phases.map((p,i) => {
+    const isActive = ph === p, isDone = S.el > p.t && !isActive;
+    return `<div class="pseg${isDone ? ' done' : isActive ? ' active' : ''}" style="${isActive ? 'background:' + blk.color : ''}"></div>`;
+  }).join('') : '';
+}
+
+loadState();
+render();
+</script>
+</body>
+</html>
