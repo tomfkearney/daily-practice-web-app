@@ -156,7 +156,7 @@
         <svg width="20" height="15" viewBox="0 0 20 15"><polyline points="2,7 7,13 18,2" fill="none" stroke="#f0f0f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="done-title">Session complete</div>
-      <div class="done-sub">64 minutes. All 7 blocks done.</div>
+      <div class="done-sub">59 minutes. All 6 blocks done.</div>
       <button class="cbtn play" onclick="restart()">go again</button>
     </div>
   </div>
@@ -194,10 +194,6 @@ const BLOCKS = [
     phases:[
       { t:0, label:'Frequency drills', instr:'Open EQ Trainer. Two rounds on guitar, two rounds on drums. Identify the character of the band first — then narrow to the exact frequency.', content:'mix' }
     ]},
-  { title:'Free improv', color:'#888780', dur:5*60, bpm:null,
-    phases:[
-      { t:0, label:'Open play', instr:'No agenda, no analysis. Play what comes. This is integration — let the practice become music.', content:'improv' }
-    ]}
 ];
 
 const WARMUPS = [
@@ -428,7 +424,7 @@ function loadState() {
     const hist = saved.history || {};
     if (saved.date !== todayKey() && saved.date && Object.keys(saved.checked||{}).length > 0) {
       const vals = Object.values(saved.checked||{});
-      hist[saved.date] = vals.filter(Boolean).length === 7 ? 'full' : vals.some(Boolean) ? 'partial' : 'missed';
+      hist[saved.date] = vals.filter(Boolean).length === 6 ? 'full' : vals.some(Boolean) ? 'partial' : 'missed';
       localStorage.setItem('practice_state', JSON.stringify({ date: todayKey(), checked: {}, history: hist }));
     }
   } catch(e) {}
@@ -439,7 +435,7 @@ function saveProgress() {
     const raw = localStorage.getItem('practice_state');
     const saved = raw ? JSON.parse(raw) : { date: todayKey(), checked: {}, history: {} };
     const checked = {};
-    const keys = ['technique','repertoire','ear','harmony','tarot','mix','bonus'];
+    const keys = ['technique','repertoire','ear','harmony','tarot','mix'];
     BLOCKS.forEach((b,i) => { checked[keys[i]] = i < S.bi || (S.bi >= BLOCKS.length); });
     localStorage.setItem('practice_state', JSON.stringify({ ...saved, date: todayKey(), checked }));
   } catch(e) {}
