@@ -315,17 +315,23 @@ function seededShuffle(arr, seed) {
 const tarotNotes = seededShuffle(NOTES_ALL, d0 * 7 + dw * 3);
 const tarotRoot = tarotNotes[0];
 const tarotTriad = TRIAD_TYPES[(d0 + dw) % TRIAD_TYPES.length];
+const tarotKeyNames = Object.keys(KEYS);
+const tarotKey = tarotKeyNames[(d0 * 3 + dw * 5) % tarotKeyNames.length];
+const tarotKeyNotes = seededShuffle([...KEYS[tarotKey]], d0 * 11 + dw * 7);
 const TAROT_EX = [
-  { name:'Single String Run', ref:'Ex 1.1',
+  { name:'Single String Run', notes:tarotNotes, notesLabel:'all 12 notes — today\'s shuffle',
     instr:'Play the shuffled sequence on the low E string in order, saying each note name aloud as you land on it. Slow tempo — find each fret before moving on. Repeat the exact same order on A, D, G, B, then high E.',
     tip:'Let muscle memory take over by the 3rd string. Accuracy first — tempo follows.' },
-  { name:'String to String', ref:'Ex 1.2',
+  { name:'Key Shuffle', notes:tarotKeyNotes, notesLabel:`key of ${tarotKey} — today's shuffle`,
+    instr:`Key of ${tarotKey}. Play the shuffled sequence on the low E string in order, naming each note aloud as you find it. Repeat the exact same order on A, D, G, B, then high E.`,
+    tip:'These notes all belong to the same key — notice how they start to feel related as you move across strings.' },
+  { name:'String to String', notes:tarotNotes, notesLabel:'all 12 notes — today\'s shuffle',
     instr:'One note per string. First card on low E, second on A, third on D, G, B, then high E. Once you reach the top, reverse back down with the next notes in sequence.',
     tip:'Keep a slow even tempo. The goal is connecting each note name to every position on every string.' },
-  { name:'The Daily Triad', ref:'Ex 3.1',
+  { name:'The Daily Triad', notes:null, notesLabel:null,
     instr:`Root: ${tarotRoot} — play it as a ${tarotTriad} triad in every inversion across each string set: Low E–A–D → A–D–G → D–G–B → G–B–E. Go up and back down through each set.`,
     tip:'Hear the quality of each inversion. Notice how the same chord sounds different depending on which note is on the bottom.' },
-  { name:'Interval Dyads', ref:'Ex 2.4',
+  { name:'Interval Dyads', notes:tarotNotes, notesLabel:'today\'s shuffle',
     instr:`Root note: ${tarotRoot}. Keep it stationary on the low E string while you play each subsequent note in the shuffled sequence as the interval note above it. Work up all 6 strings.`,
     tip:'Try both root-on-bottom and root-on-top voicings. Train your ear to recognise each interval before you see the fret.' },
 ];
@@ -440,10 +446,10 @@ ${PROGS.filter(p=>p!==tp).slice(0,3).map(p=>`<div style="display:flex;gap:9px;al
 <div class="clabel" style="margin-top:10px">reharmonization move</div>
 <div class="citem"><div class="citem-title">${tr.sub}</div><div class="citem-body">${tr.desc}</div><div class="citem-sub">${tr.eg}</div></div>`;
 
-    case 'tarot': return `<div class="clabel">${tarotEx.ref} — ${tarotEx.name}</div>
+    case 'tarot': return `<div class="clabel">${tarotEx.name}</div>
 <div class="citem" style="margin-bottom:10px"><div class="citem-body" style="font-size:13px;line-height:1.7">${tarotEx.instr}</div><div class="citem-sub" style="margin-top:6px">${tarotEx.tip}</div></div>
-<div class="clabel">today's shuffle</div>
-<div style="display:flex;flex-wrap:wrap;gap:4px">${tarotNotes.map((n,i)=>`<div style="background:var(--bg4);border:.5px solid var(--border2);border-radius:5px;padding:4px 0 3px;font-family:var(--mono);min-width:34px;text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:1px">${i+1}</div><div style="font-size:13px;color:${i===0?'#9B5DE5':'var(--text1)'}">${n}</div></div>`).join('')}</div>`;
+${tarotEx.notes ? `<div class="clabel">${tarotEx.notesLabel}</div>
+<div style="display:flex;flex-wrap:wrap;gap:4px">${tarotEx.notes.map((n,i)=>`<div style="background:var(--bg4);border:.5px solid var(--border2);border-radius:5px;padding:4px 0 3px;font-family:var(--mono);min-width:34px;text-align:center"><div style="font-size:9px;color:var(--text3);margin-bottom:1px">${i+1}</div><div style="font-size:13px;color:${i===0?'#9B5DE5':'var(--text1)'}">${n}</div></div>`).join('')}</div>` : ''}`;
 
     case 'mix': return `<div class="clabel">frequency bands</div>
 <table class="freq-tbl">
