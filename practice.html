@@ -203,7 +203,8 @@ const BLOCKS = [
   { title:'Technique', color:'#7F77DD', dur:13*60, bpm:80,
     phases:[
       { t:0, label:'Chromatic', instr:'Chromatic up and down — all strings, all finger combinations. Keep pressure light.', content:'chromatic' },
-      { t:5*60, label:'Peter Dominguez', instr:'Peter Dominguez scales. Use today\'s finger sequence across all strings.', content:'dominguez' }
+      { t:4*60, label:'Peter Dominguez', instr:'Peter Dominguez scales. Use today\'s finger sequence across all strings.', content:'dominguez' },
+      { t:9*60, label:'Groove', instr:'Metronome on. Play a rhythm figure and feel the click inside the note, not after it. Anticipate the beat — don\'t chase it.', content:'groove' }
     ]},
   { title:'Repertoire', color:'#1D9E75', dur:8*60, bpm:90,
     phases:[
@@ -229,6 +230,14 @@ const BLOCKS = [
 ];
 
 const pdSeq = seededShuffle([1,2,3,4], d0 * 13 + dw * 7);
+const GROOVES = [
+  'Beats 2 and 4 only — mute everything else. Feel the backbeat pocket.',
+  '16th note strum with dead strings — keep the muted notes perfectly even.',
+  'Simple bassline on low strings with click. Land exactly on the beat.',
+  'Call-and-response: 2 bars rhythm, 2 bars silence. Come back in exactly on 1.',
+  'Swing 8ths on I-IV-V. Let the notes breathe — don\'t rush the triplet feel.'
+];
+const tg = GROOVES[(d0 + dw) % GROOVES.length];
 const PROGS = [
   {name:'Pop I-V-vi-IV', nums:'1 – 5 – 6m – 4', eg:'G D Em C'},
   {name:'Jazz ii-V-I', nums:'2m7 – 5 7 – 1 maj7', eg:'Dm7 G7 Cmaj7'},
@@ -389,6 +398,10 @@ function cc(content) {
 
     case 'dominguez': return `<div class="clabel">today's sequence</div>
 <div class="citem" style="text-align:center;padding:18px 14px"><div style="font-family:var(--mono);font-size:36px;letter-spacing:6px;color:var(--text1)">${pdSeq.join(' ')}</div><div class="citem-sub" style="margin-top:8px">Peter Dominguez scales</div></div>`;
+
+    case 'groove': return `<div class="clabel">groove exercise</div>
+<div class="citem"><div class="citem-body">${tg}</div></div>
+<div class="citem-sub" style="margin-top:6px">Feel the beat before it arrives — anticipation, not reaction</div>`;
 
     case 'rep_run': {
       const songs = loadSongs();
@@ -605,7 +618,8 @@ function openEditor() {
   document.getElementById('editorContent').innerHTML = [
     edSection('Technique', [
       `<div class="citem-body">Chromatic up and down with different finger combinations.</div>`,
-      `<div class="citem-body">Peter Dominguez scales — today's sequence: <span style="font-family:var(--mono)">${pdSeq.join(' ')}</span></div>`
+      `<div class="citem-body">Peter Dominguez scales — today's sequence: <span style="font-family:var(--mono)">${pdSeq.join(' ')}</span></div>`,
+      `<div class="citem-body">Groove — ${tg}</div>`
     ]),
     edSection('Ear Training — Progressions', PROGS.map(p =>
       `<div class="citem-title">${p.name}</div><div class="prog-nums">${p.nums}</div><div class="citem-sub">In C: ${p.eg}</div>`)),
