@@ -200,11 +200,10 @@ const EAR_EXERCISES = [
 const EAR_EX = EAR_EXERCISES[(d0 + dw) % EAR_EXERCISES.length];
 
 const BLOCKS = [
-  { title:'Technique & groove', color:'#7F77DD', dur:13*60, bpm:80,
+  { title:'Technique', color:'#7F77DD', dur:13*60, bpm:80,
     phases:[
-      { t:0, label:'Warm-up', instr:'4-finger chromatic, ascending and descending all strings. Keep pressure light — this is blood flow, not muscle work.', content:'warmup' },
-      { t:3*60, label:'Speed drill', instr:'Pick a pattern. Start at your current BPM, add 4 BPM every 2 clean passes. Even pick attack throughout — accuracy then speed.', content:'speed' },
-      { t:8*60, label:'Groove', instr:'Metronome on. Play a rhythm figure and feel the click inside the note, not after it. Anticipate the beat — don\'t chase it.', content:'groove' }
+      { t:0, label:'Chromatic', instr:'Chromatic up and down — all strings, all finger combinations. Keep pressure light.', content:'chromatic' },
+      { t:5*60, label:'Peter Dominguez', instr:'Peter Dominguez scales. Use today\'s finger sequence across all strings.', content:'dominguez' }
     ]},
   { title:'Repertoire', color:'#1D9E75', dur:8*60, bpm:90,
     phases:[
@@ -229,26 +228,7 @@ const BLOCKS = [
     ]},
 ];
 
-const WARMUPS = [
-  {name:'Spider crawl', desc:'1-2-3-4 on each string, all 6 strings, ascending and descending. Keep all 4 fingers down.'},
-  {name:'Chromatic scale', desc:'One string, every fret from open to 12. Economy of motion — no wasted movement.'},
-  {name:'Hammer-on / pull-off', desc:'Two adjacent fingers only, legato — no pick. Build the hand strength.'},
-  {name:'Trills', desc:'1st and 3rd finger trill, 20 seconds per string. Even volume on both notes.'}
-];
-const SPEEDS = [
-  'Pentatonic box 1 — ascending and descending, strict alternate pick',
-  'Triplet arpeggio across all 6 strings, A minor shape',
-  '6-note sequence per string: 1-2-3-1-2-3, shift position each string',
-  'String-skipping: E and G strings only, minor pentatonic intervals',
-  'Economy picking: 3-notes-per-string major scale, one directional sweep per string change'
-];
-const GROOVES = [
-  'Beats 2 and 4 only — mute everything else. Feel the backbeat pocket.',
-  '16th note strum with dead strings — keep the muted notes perfectly even.',
-  'Simple bassline on low strings with click. Land exactly on the beat.',
-  'Call-and-response: 2 bars rhythm, 2 bars silence. Come back in exactly on 1.',
-  'Swing 8ths on I-IV-V. Let the notes breathe — don\'t rush the triplet feel.'
-];
+const pdSeq = seededShuffle([1,2,3,4], d0 * 13 + dw * 7);
 const PROGS = [
   {name:'Pop I-V-vi-IV', nums:'1 – 5 – 6m – 4', eg:'G D Em C'},
   {name:'Jazz ii-V-I', nums:'2m7 – 5 7 – 1 maj7', eg:'Dm7 G7 Cmaj7'},
@@ -373,9 +353,6 @@ const TAROT_EX = [
 ];
 const tarotEx = TAROT_EX[d0 % TAROT_EX.length];
 
-const tw = WARMUPS[d0 % WARMUPS.length];
-const ts = SPEEDS[d0 % SPEEDS.length];
-const tg = GROOVES[(d0 + dw) % GROOVES.length];
 const tp = PROGS[(d0 + dw) % PROGS.length];
 const tc = CHORDS[d0 % CHORDS.length];
 const tr = REHARMS[(d0 + 1) % REHARMS.length];
@@ -407,17 +384,11 @@ function addSongFromInput() {
 
 function cc(content) {
   switch(content) {
-    case 'warmup': return `<div class="clabel">today's drill</div>
-<div class="citem"><div class="citem-title">${tw.name}</div><div class="citem-body">${tw.desc}</div></div>
-<div class="citem-sub" style="margin-top:6px">speed drill starts at 3:00</div>`;
+    case 'chromatic': return `<div class="clabel">exercise</div>
+<div class="citem"><div class="citem-body">Chromatic up and down with different finger combinations.</div></div>`;
 
-    case 'speed': return `<div class="clabel">today's pattern</div>
-<div class="citem"><div class="citem-body">${ts}</div></div>
-<div class="citem-sub" style="margin-top:6px">Start at your current BPM — raise 4 every 2 clean passes</div>`;
-
-    case 'groove': return `<div class="clabel">groove exercise</div>
-<div class="citem"><div class="citem-body">${tg}</div></div>
-<div class="citem-sub" style="margin-top:6px">Feel the beat before it arrives — anticipation, not reaction</div>`;
+    case 'dominguez': return `<div class="clabel">today's sequence</div>
+<div class="citem" style="text-align:center;padding:18px 14px"><div style="font-family:var(--mono);font-size:36px;letter-spacing:6px;color:var(--text1)">${pdSeq.join(' ')}</div><div class="citem-sub" style="margin-top:8px">Peter Dominguez scales</div></div>`;
 
     case 'rep_run': {
       const songs = loadSongs();
@@ -632,12 +603,10 @@ function openEditor() {
   }
 
   document.getElementById('editorContent').innerHTML = [
-    edSection('Technique — Warm-ups', WARMUPS.map(w =>
-      `<div class="citem-title">${w.name}</div><div class="citem-body">${w.desc}</div>`)),
-    edSection('Technique — Speed drills', SPEEDS.map(s =>
-      `<div class="citem-body">${s}</div>`)),
-    edSection('Technique — Grooves', GROOVES.map(g =>
-      `<div class="citem-body">${g}</div>`)),
+    edSection('Technique', [
+      `<div class="citem-body">Chromatic up and down with different finger combinations.</div>`,
+      `<div class="citem-body">Peter Dominguez scales — today's sequence: <span style="font-family:var(--mono)">${pdSeq.join(' ')}</span></div>`
+    ]),
     edSection('Ear Training — Progressions', PROGS.map(p =>
       `<div class="citem-title">${p.name}</div><div class="prog-nums">${p.nums}</div><div class="citem-sub">In C: ${p.eg}</div>`)),
     edSection('Harmony — Chords', CHORDS.map(c =>
