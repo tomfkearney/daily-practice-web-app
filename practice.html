@@ -192,6 +192,13 @@
 <script>
 const d0 = new Date().getDate(), dw = new Date().getDay();
 
+const EAR_EXERCISES = [
+  { label:'Vocal melody', instr:'Pick a track. Find the opening note of the vocal melody, then work out every note by ear — hum each interval before finding it on guitar. No tab, no shortcuts.', content:'ear_mel' },
+  { label:'Bass line', instr:'Pick a track. Lock onto the bass and find the root movement first, then fill in the passing notes. Play along at low volume — match the timing exactly.', content:'ear_bass' },
+  { label:'Chord transcription', instr:'Pick a track. Find the root of each chord, identify the quality by ear, then find the voicing on guitar. Confirm by playing along.', content:'ear_chords' },
+];
+const EAR_EX = EAR_EXERCISES[(d0 + dw) % EAR_EXERCISES.length];
+
 const BLOCKS = [
   { title:'Technique & groove', color:'#7F77DD', dur:13*60, bpm:80,
     phases:[
@@ -206,8 +213,7 @@ const BLOCKS = [
     ]},
   { title:'Ear training', color:'#378ADD', dur:8*60, bpm:70,
     phases:[
-      { t:0, label:'Progression ID', instr:'Pick a track. Find the root, work out the full chord progression by ear. Sing the root motion first, then confirm on guitar.', content:'ear_prog' },
-      { t:4*60, label:'Melody transcription', instr:'Pick a vocal or guitar line. Hum it first, find the opening note, then walk each interval. Don\'t jump ahead.', content:'ear_mel' }
+      { t:0, label:EAR_EX.label, instr:EAR_EX.instr, content:EAR_EX.content }
     ]},
   { title:'Harmony & fretboard', color:'#BA7517', dur:5*60, bpm:60,
     phases:[
@@ -433,13 +439,14 @@ ${songs.length > 1 ? `<div class="clabel" style="margin-top:10px">repertoire (${
 ${[['Isolate','Find the exact 4-bar passage that breaks down'],['Slow it','70% of target tempo — every note clean'],['Ramp up','+4 BPM every 2 clean passes'],['In context','2 bars before → passage → 2 bars after']].map(([t,b])=>`<div class="citem" style="padding:7px 11px"><div style="display:flex;gap:9px;align-items:baseline"><span class="citem-title">${t}</span><span class="citem-body">${b}</span></div></div>`).join('')}`;
     }
 
-    case 'ear_prog': return `<div class="clabel">today's target</div>
-<div class="citem"><div class="citem-title">${tp.name}</div><div class="prog-nums">${tp.nums}</div><div class="citem-sub">In C: ${tp.eg}</div></div>
-<div class="clabel" style="margin-top:10px">also listen for</div>
-${PROGS.filter(p=>p!==tp).slice(0,3).map(p=>`<div style="display:flex;gap:9px;align-items:baseline;padding:5px 2px;border-bottom:.5px solid rgba(255,255,255,.07)"><span class="citem-body" style="min-width:110px;flex-shrink:0">${p.name}</span><span style="font-family:var(--mono);font-size:12px;color:#888">${p.nums}</span></div>`).join('')}`;
-
     case 'ear_mel': return `<div class="clabel">interval reference</div>
 <div class="cgrid">${INTERVALS.slice(0,8).map(i=>`<div class="citem" style="padding:7px 10px"><div class="citem-title">${i.n}</div><div class="citem-sub">${i.s}</div></div>`).join('')}</div>`;
+
+    case 'ear_bass': return `<div class="clabel">approach</div>
+${[['Find the root','Lock onto the lowest note of each chord — sing it before you find it'],['Map the motion','Is it stepwise, leaping, or staying put? Feel the shape first'],['Add passing notes','Fill in the notes between roots once the skeleton is solid'],['Play along','Match the timing exactly — rhythmic accuracy matters as much as pitch']].map(([t,b])=>`<div class="citem" style="padding:7px 11px"><div style="display:flex;gap:9px;align-items:baseline"><span class="citem-title">${t}</span><span class="citem-body">${b}</span></div></div>`).join('')}`;
+
+    case 'ear_chords': return `<div class="clabel">chord qualities to listen for</div>
+${[['Major','Bright, resolved — 1 3 5'],['Minor','Dark, melancholic — 1 ♭3 5'],['Dom 7th','Tense, bluesy — 1 3 5 ♭7'],['Maj 7th','Dreamy, open — 1 3 5 7'],['Min 7th','Mellow, jazz — 1 ♭3 5 ♭7'],['Diminished','Unstable, tense — 1 ♭3 ♭5']].map(([t,b])=>`<div class="citem" style="padding:7px 11px"><div style="display:flex;gap:9px;align-items:baseline"><span class="citem-title" style="min-width:72px">${t}</span><span class="citem-body">${b}</span></div></div>`).join('')}`;
 
     case 'harmony': return `<div class="clabel">today's chord</div>
 <div class="citem" style="text-align:center;padding:14px"><div class="chord-big">${tc}</div><div class="citem-sub">${tc.endsWith('m') ? 'minor' : 'major'} triad — root position + 1st + 2nd inversion, whole neck</div></div>
